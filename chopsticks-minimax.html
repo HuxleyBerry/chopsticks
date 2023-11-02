@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Chopsticks</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+	<h2>Maximum Fingers</h2>
+	<button id="fourfingers" onclick="fourFingers()">4 fingers</button>
+	<button id="fivefingers" onclick="fiveFingers()">5 fingers</button>
+	<img class="hand" id="hand2" src="1.png" />
+	<img class="hand" id="hand3" src="1.png" />
+	<img class="hand" id="hand0" src="1.png" />
+	<img class="hand" id="hand1" src="1.png" />
+	<button id="esc-button" onclick="reset()">Esc</button>
+	<div id="dropdown">
+		<button id="dropbtn">Transfer</button>
+		<div id="dropdown-content"></div>
+	</div>
+	<script src="minimax.js"></script>
+	<script src="ui.js"></script>
+</body>
+
+</html>
