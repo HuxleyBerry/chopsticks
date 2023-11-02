@@ -1,7 +1,7 @@
-let maxFingers = 3;
-let remainders = true;
+let maxFingers = 5;
+let remainders = false;
 
-let maxDepth = 20;
+let maxDepth = 25;
 
 // actions:
 // 0: tap with left hand to left hand
@@ -71,6 +71,17 @@ function minimax(state, currentPlayer, currentDepth, alpha, beta, firstMove, nod
 
 function getActions(state, currentPlayer) {
     let actions = [];
+    // By symmetry, we can assume that fingers will always be transferred in such a way to leave more on equal on the right hand
+    let maxAllowedTransfer = Math.min(maxFingers - state[currentPlayer * 2 + 1], state[currentPlayer * 2])
+    let minAllowedTransfer = Math.ceil((state[currentPlayer * 2] - state[currentPlayer * 2 + 1]) / 2)
+    for (let i = minAllowedTransfer; i <= maxAllowedTransfer; i++) {
+        // Transferring 0 fingers would be like skipping a move
+        // Also, transferring the difference is like skipping a move
+        // Both of these are banned
+        if (i !== 0 && i !== state[currentPlayer * 2] - state[currentPlayer * 2 + 1]) {
+            actions.push(i - 100);
+        }
+    }
     if (state[0] !== 0) {
         if (state[2] !== 0) {
             addToActionListHeuristically(actions, state, currentPlayer, 0);
@@ -87,17 +98,7 @@ function getActions(state, currentPlayer) {
         }
     }
 
-    // By symmetry, we can assume that fingers will always be transferred in such a way to leave more on equal on the right hand
-    let maxAllowedTransfer = Math.min(maxFingers - state[currentPlayer * 2 + 1], state[currentPlayer * 2])
-    let minAllowedTransfer = Math.ceil((state[currentPlayer * 2] - state[currentPlayer * 2 + 1]) / 2)
-    for (let i = minAllowedTransfer; i <= maxAllowedTransfer; i++) {
-        // Transferring 0 fingers would be like skipping a move
-        // Also, transferring the difference is like skipping a move
-        // Both of these are banned
-        if (i !== 0 && i !== state[currentPlayer * 2] - state[currentPlayer * 2 + 1]) {
-            actions.push(i - 100);
-        }
-    }
+
     return actions;
 }
 
