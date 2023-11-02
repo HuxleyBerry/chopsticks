@@ -1,7 +1,7 @@
-let maxFingers = 4;
+let maxFingers = 3;
 let remainders = true;
 
-let maxDepth = 11;
+let maxDepth = 18;
 
 // actions:
 // 0: tap with left hand to left hand
@@ -9,32 +9,63 @@ let maxDepth = 11;
 // 2: tap with right hand to left hand
 // 3: tap with right hand to right hand
 // n - 100: transfer n fingers from left hand to right hand
-function minimax(state, currentPlayer, currentDepth) {
+function minimax(state, currentPlayer, currentDepth, alpha, beta, firstMove, nodeCount) {
+    nodeCount++;
     if (isTerminal(state) || currentDepth === maxDepth) {
-        return evaluate(state);
+        return [evaluate(state), nodeCount];
     }
     if (currentPlayer == 0) { // max
         let possibleActions = getActions(state, currentPlayer);
         let maxUtility = -1000;
-        possibleActions.forEach(action => {
-            let newState = performAction(state, currentPlayer, action)
-            let resultUtility = minimax(newState, 1, currentDepth + 1)
-            if (resultUtility > maxUtility) {
-                maxUtility = resultUtility
+        let bestAction;
+        for (const action of possibleActions) {
+            let newState = performAction(state, currentPlayer, action);
+            let [resultUtility, newNodeCount] = minimax(newState, 1, currentDepth + 1, alpha, beta, false, nodeCount);
+            nodeCount = newNodeCount;
+            if (firstMove) {
+                console.log(`action ${action} has utility ${resultUtility}`);
             }
-        });
-        return maxUtility
+            if (resultUtility > maxUtility) {
+                maxUtility = resultUtility;
+                bestAction = action;
+            }
+            if (resultUtility > alpha) {
+                // alpha is the lower bound for the score max can guarantee
+                // We just found that max can achieve a utility of at least resultUtility, so we update alpha
+                alpha = resultUtility;
+            }
+            if (resultUtility > beta) {
+                // beta is the upper bound for the score min can guarantee
+                // This means that maximum utility of the all the actions max could do is bigger than beta
+                // Thus, we know min will not choose this branch
+                // We can tell this without continuing the loop, so we break.
+                break;
+            }
+        };
+        if (firstMove) {
+            console.log()
+            return [bestAction, nodeCount]; // if this the first move, then we care about the move taken, so we return that instead of the utility
+        } else {
+            return [maxUtility, nodeCount];
+        }
     } else if (currentPlayer == 1) { // min
         let possibleActions = getActions(state, currentPlayer);
         let minUtility = 1000;
-        possibleActions.forEach(action => {
-            let newState = performAction(state, currentPlayer, action)
-            let resultUtility = minimax(newState, 0, currentDepth + 1)
+        for (const action of possibleActions) {
+            let newState = performAction(state, currentPlayer, action);
+            let [resultUtility, newNodeCount] = minimax(newState, 0, currentDepth + 1, alpha, beta, false, nodeCount);
+            nodeCount = newNodeCount;
             if (resultUtility < minUtility) {
-                minUtility = resultUtility
+                minUtility = resultUtility;
             }
-        });
-        return minUtility
+            if (resultUtility < beta) {
+                beta = resultUtility;
+            }
+            if (resultUtility < alpha) {
+                break;
+            }
+        };
+        return [minUtility, nodeCount]
     }
 }
 
@@ -42,15 +73,6 @@ function getActions(state, currentPlayer) {
     // TODO: remove duplicates that result from hands on the same team having the same number of fingers
     // future consideration: order matters for alpha beta pruning
     let actions = [];
-    /*for (let i = 0; i < 2; i++) {
-        if (state[2 * currentPlayer + i] != 0) { // can't tap with an empty hand or onto an empty hand
-            for (let j = 0; j < 2; j++) {
-                if (state[2 * (1 - currentPlayer) + j] != 0) {
-                    actions.push(2 * i + j);
-                }
-            }
-        }
-    }*/
     if (state[0] !== 0) {
         if (state[2] !== 0) {
             actions.push(0)
@@ -118,17 +140,7 @@ function performAction(state, currentPlayer, action) {
 }
 
 function chooseAction(state) { // computer choosing action
-    let possibleActions = getActions(state, 0);
-    let maxUtility = -1000;
-    let bestAction;
-    possibleActions.forEach(action => {
-        let newState = performAction(state, 0, action)
-        let resultUtility = minimax(newState, 1, 0)
-        console.log(action, resultUtility);
-        if (resultUtility > maxUtility) {
-            maxUtility = resultUtility
-            bestAction = action
-        }
-    });
-    return bestAction;
+    let [action, nodeCount] = minimax(state, 0, 0, -1000, 1000, true, 0);
+    console.log(`examined ${nodeCount} nodes`);
+    return action;
 }

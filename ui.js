@@ -130,10 +130,10 @@ function makeTransferOptions() {
     }
 }
 
-var mouseMoved = function (e) {
+function mouseMoved(event) {
     if (selectedHand !== -1) {
-        handElements[selectedHand + 2].style.left = e.clientX + "px";
-        handElements[selectedHand + 2].style.top = e.clientY + "px";
+        handElements[selectedHand + 2].style.left = event.clientX + "px";
+        handElements[selectedHand + 2].style.top = event.clientY + "px";
     }
 }
 
@@ -146,7 +146,6 @@ function getEnemyTurn() {
 var run = function () {
     if (enemyTurn) {
         if (count >= 20) {
-            console.log(enemyMove);
             enemyTurn = false;
             count = 0;
             drawHands(fingersList);
