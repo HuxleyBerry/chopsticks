@@ -1,7 +1,7 @@
 let maxFingers = 3;
 let remainders = true;
 
-let maxDepth = 18;
+let maxDepth = 20;
 
 // actions:
 // 0: tap with left hand to left hand
@@ -23,7 +23,7 @@ function minimax(state, currentPlayer, currentDepth, alpha, beta, firstMove, nod
             let [resultUtility, newNodeCount] = minimax(newState, 1, currentDepth + 1, alpha, beta, false, nodeCount);
             nodeCount = newNodeCount;
             if (firstMove) {
-                console.log(`action ${action} has utility ${resultUtility}`);
+                console.log(`action ${action} has utility ${resultUtility}. ${alpha} ${beta}`);
             }
             if (resultUtility > maxUtility) {
                 maxUtility = resultUtility;
@@ -34,7 +34,7 @@ function minimax(state, currentPlayer, currentDepth, alpha, beta, firstMove, nod
                 // We just found that max can achieve a utility of at least resultUtility, so we update alpha
                 alpha = resultUtility;
             }
-            if (resultUtility > beta) {
+            if (resultUtility >= beta) {
                 // beta is the upper bound for the score min can guarantee
                 // This means that maximum utility of the all the actions max could do is bigger than beta
                 // Thus, we know min will not choose this branch
@@ -61,7 +61,7 @@ function minimax(state, currentPlayer, currentDepth, alpha, beta, firstMove, nod
             if (resultUtility < beta) {
                 beta = resultUtility;
             }
-            if (resultUtility < alpha) {
+            if (resultUtility <= alpha) {
                 break;
             }
         };
@@ -70,22 +70,20 @@ function minimax(state, currentPlayer, currentDepth, alpha, beta, firstMove, nod
 }
 
 function getActions(state, currentPlayer) {
-    // TODO: remove duplicates that result from hands on the same team having the same number of fingers
-    // future consideration: order matters for alpha beta pruning
     let actions = [];
     if (state[0] !== 0) {
         if (state[2] !== 0) {
-            actions.push(0)
+            addToActionListHeuristically(actions, state, currentPlayer, 0);
         }
         if (state[3] !== 0 && state[3] !== state[2]) {
-            actions.push(1 + currentPlayer)
+            addToActionListHeuristically(actions, state, currentPlayer, 1 + currentPlayer);
         }
     } if (state[1] !== 0 && state[1] !== state[0]) {
         if (state[2] !== 0) {
-            actions.push(2 - currentPlayer)
+            addToActionListHeuristically(actions, state, currentPlayer, 2 - currentPlayer);
         }
         if (state[3] !== 0 && state[3] !== state[2]) {
-            actions.push(3)
+            addToActionListHeuristically(actions, state, currentPlayer, 3);
         }
     }
 
@@ -101,6 +99,22 @@ function getActions(state, currentPlayer) {
         }
     }
     return actions;
+}
+
+function moveKillsHand(state, currentPlayer, move) {
+    const tappingHand = Math.floor(move / 2) + 2 * currentPlayer;
+    const tappedHand = 2 * (1 - currentPlayer) + move % 2;
+    const fingerSum = state[tappedHand] + state[tappingHand];
+    return fingerSum > maxFingers && (!remainders || fingerSum === maxFingers + 1);
+}
+
+function addToActionListHeuristically(actionList, state, currentPlayer, move) {
+    if (moveKillsHand(state, currentPlayer, move)) {
+        // add to the front
+        actionList.unshift(move);
+    } else {
+        actionList.push(move);
+    }
 }
 
 function evaluate(state) {
@@ -140,7 +154,7 @@ function performAction(state, currentPlayer, action) {
 }
 
 function chooseAction(state) { // computer choosing action
-    let [action, nodeCount] = minimax(state, 0, 0, -1000, 1000, true, 0);
+    let [action, nodeCount] = minimax(state, 0, 0, -100, 100, true, 0);
     console.log(`examined ${nodeCount} nodes`);
     return action;
 }
