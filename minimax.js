@@ -1,10 +1,10 @@
-let maxFingers = 5;
+let maxFingers = 4;
 let remainders = false;
 
 let maxDepth = 25;
 
 // actions:
-// 0: tap with left hand to left hand
+// 0: tap with left hand to l   eft hand
 // 1: tap with left hand to right hand
 // 2: tap with right hand to left hand
 // 3: tap with right hand to right hand
@@ -97,8 +97,6 @@ function getActions(state, currentPlayer) {
             addToActionListHeuristically(actions, state, currentPlayer, 3);
         }
     }
-
-
     return actions;
 }
 

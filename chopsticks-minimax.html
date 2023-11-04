@@ -7,17 +7,39 @@
 </head>
 
 <body>
-	<h2>Maximum Fingers</h2>
-	<button id="fourfingers" onclick="fourFingers()">4 fingers</button>
-	<button id="fivefingers" onclick="fiveFingers()">5 fingers</button>
-	<img class="hand" id="hand2" src="1.png" />
-	<img class="hand" id="hand3" src="1.png" />
-	<img class="hand" id="hand0" src="1.png" />
-	<img class="hand" id="hand1" src="1.png" />
-	<button id="esc-button" onclick="reset()">Esc</button>
-	<div id="dropdown">
-		<button id="dropbtn">Transfer</button>
-		<div id="dropdown-content"></div>
+	<div id="wrapper">
+		<div id="game-div">
+			<img class="hand" id="hand2" src="1.png" />
+			<img class="hand" id="hand3" src="1.png" />
+			<img class="hand" id="hand0" src="1.png" />
+			<img class="hand" id="hand1" src="1.png" />
+			<button id="esc-button" onclick="reset()">Esc</button>
+			<div id="dropdown">
+				<button id="dropbtn">Transfer</button>
+				<div id="dropdown-content"></div>
+			</div>
+			<button id="play-again" onclick="restart()">Reset</button>
+		</div>
+		<div id="options-div">
+			<h1>Options</h1>
+			<p>Maximum number of fingers per hand:</p>
+			<input type="radio" id="select-2-fingers" name="max-fingers" value="2" />
+			<label for="select-2-fingers">2 fingers</label>
+			<input type="radio" id="select-3-fingers" name="max-fingers" value="3" />
+			<label for="select-3-fingers">3 fingers</label>
+			<input type="radio" id="select-4-fingers" name="max-fingers" value="4" checked />
+			<label for="select-4-fingers">4 fingers</label>
+			<input type="radio" id="select-5-fingers" name="max-fingers" value="5" />
+			<label for="select-4-fingers">5 fingers</label>
+			<br>
+			<br>
+			<input type="checkbox" id="remainders-checkbox" />
+			<label for="remainders-checkbox">Enable remainders</label>
+			<br>
+			<p>Search depth of opponent:</p>
+			<input type="range" id="depth-slider" name="depth-slider" min="5" max="30" value="25" step="5" />
+			<label id="depth-slider-label" for="depth-slider">25</label>
+		</div>
 	</div>
 	<script src="minimax.js"></script>
 	<script src="ui.js"></script>
