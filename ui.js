@@ -15,6 +15,8 @@ let gameOver = true;
 let animationStart, previousTimeStep;
 const ENEMY_MOVE_LENGTH = 1000; // in milliseconds
 
+let clickOffsetX, clickOffsetY
+
 function drawHands(flist) {
     // indices 0 and 1 correspond to the computer's hands, 2 and 3 correspond to the player's hands
 
@@ -53,8 +55,10 @@ function toggleButtonVisibility(show) {
 }
 
 function selectHand(event) {
-    if (selectedHand == -1 && enemyTurn == false && !gameOver) {
-        selectedHand = event.target == handElements[2] ? 0 : 1;
+    if (selectedHand == -1 && enemyTurn === false && !gameOver) {
+        clickOffsetX = event.target === handElements[2] ? event.offsetX : event.target.width - event.offsetX;
+        clickOffsetY = event.offsetY;
+        selectedHand = event.target === handElements[2] ? 0 : 1;
         makeTransferOptions();
         toggleButtonVisibility(true);
     }
@@ -133,8 +137,8 @@ function makeTransferOptions() {
 
 function mouseMoved(event) {
     if (selectedHand !== -1) {
-        handElements[selectedHand + 2].style.left = event.clientX + "px";
-        handElements[selectedHand + 2].style.top = event.clientY + "px";
+        handElements[selectedHand + 2].style.left = event.clientX - clickOffsetX + "px";
+        handElements[selectedHand + 2].style.top = event.clientY - clickOffsetY + "px";
     }
 }
 
