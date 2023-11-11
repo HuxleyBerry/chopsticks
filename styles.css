@@ -71,13 +71,12 @@ body {
 }
 
 #play-again {
-    background-color: orange;
+    background-color: rgb(0, 176, 0);
     padding: 10px;
     border: solid black;
     position: absolute;
     top: 750px;
     left: 220px;
-    display: none;
 }
 
 #depth-slider,

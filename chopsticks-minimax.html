@@ -18,10 +18,15 @@
 				<button id="dropbtn">Transfer</button>
 				<div id="dropdown-content"></div>
 			</div>
-			<button id="play-again" onclick="restart()">Reset</button>
+			<button id="play-again">Start Game</button>
 		</div>
 		<div id="options-div">
 			<h1>Options</h1>
+			<p>Starting player:</p>
+			<input type="radio" id="select-you-first" name="first-player" value="you" checked />
+			<label for="select-you-first">You</label>
+			<input type="radio" id="select-opponent-first" name="first-player" value="opponent" />
+			<label for="select-opponent-first">Opponent</label>
 			<p>Maximum number of fingers per hand:</p>
 			<input type="radio" id="select-2-fingers" name="max-fingers" value="2" />
 			<label for="select-2-fingers">2 fingers</label>

@@ -2,9 +2,6 @@ let fingersList = [1, 1, 1, 1];
 const imgList = ["0.png", "1.png", "2.png", "3.png", "4.png", "5.png"];
 const posAdjustments = [[0, 0], [0, 0], [-1, -10], [-1, -9], [-10, -12], [-29, -5]];
 
-let enemyMove;
-let count = 0;
-
 const escButton = document.getElementById("esc-button");
 escButton.style.display = "none";
 const dropdown = document.getElementById("dropdown");
@@ -12,8 +9,11 @@ dropdown.style.display = "none";
 const dropdownContent = document.getElementById("dropdown-content");
 const handElements = [0, 1, 2, 3].map(n => document.getElementById(`hand${n}`))
 
+let startingPlayer = "you";
 let enemyTurn = false;
-let gameOver = false;
+let gameOver = true;
+let animationStart, previousTimeStep;
+const ENEMY_MOVE_LENGTH = 1000; // in milliseconds
 
 function drawHands(flist) {
     // indices 0 and 1 correspond to the computer's hands, 2 and 3 correspond to the player's hands
@@ -86,7 +86,7 @@ function completePlayerTurn() {
     if (fingersList[0] === 0 && fingersList[1] === 0) {
         endGame(1);
     } else {
-        getEnemyTurn();
+        performEnemyTurn();
     }
 }
 function calcAllowedTransfers(sel, oth) {
@@ -138,42 +138,47 @@ function mouseMoved(event) {
     }
 }
 
-function getEnemyTurn() {
-    enemyMove = chooseAction(fingersList);
-    fingersList = performAction(fingersList, 0, enemyMove);
+function performEnemyTurn() {
     enemyTurn = true;
+    let move = chooseAction(fingersList);
+    window.requestAnimationFrame((timestep) => moveHand(timestep, move));
+    fingersList = performAction(fingersList, 0, move);
 };
 
-function run() {
-    if (enemyTurn) {
-        if (count >= 20) {
-            enemyTurn = false;
-            count = 0;
-            drawHands(fingersList);
-            if (fingersList[2] === 0 && fingersList[3] === 0) {
-                endGame(0);
-            }
-        } else if (enemyMove >= 0) { // enemyMove isn't a transfer
-            let movingHandElement = handElements[Math.floor(enemyMove / 2)]
-            let crossing = enemyMove === 1 ? 1 : (enemyMove === 2 ? -1 : 0);
-            movingHandElement.style.top = parseFloat(movingHandElement.style.top) + 10 + "px";
-            movingHandElement.style.left = parseFloat(movingHandElement.style.left) + 10 * crossing + "px";
+function moveHand(timestep, move) {
+    if (animationStart === undefined) {
+        animationStart = timestep;
+        previousTimeStep = timestep;
+    }
+    let elapsed = timestep - animationStart;
+    if (move >= 0) { // move isn't a transfer
+        let movingHandElement = handElements[Math.floor(move / 2)]
+        let crossing = move === 1 ? 1 : (move === 2 ? -1 : 0);
+        movingHandElement.style.top = parseFloat(movingHandElement.style.top) + (timestep - previousTimeStep) * 0.2 + "px";
+        movingHandElement.style.left = parseFloat(movingHandElement.style.left) + (timestep - previousTimeStep) * 0.2 * crossing + "px";
+    }
+    previousTimeStep = timestep;
+    if (elapsed < ENEMY_MOVE_LENGTH) {
+        window.requestAnimationFrame((timestep) => moveHand(timestep, move));
+    } else {
+        animationStart = undefined;
+        drawHands(fingersList);
+        enemyTurn = false;
+        if (fingersList[2] === 0 && fingersList[3] === 0) {
+            endGame(0);
         }
-        count++;
     }
 };
 function toggleSettingAccess(allowAccess) {
-    document.querySelectorAll('input[name="max-fingers"]').forEach(radioButton => {
-        radioButton.disabled = allowAccess;
+    document.querySelectorAll('#options-div > input').forEach(input => {
+        input.disabled = allowAccess;
     })
-    document.getElementById("remainders-checkbox").disabled = allowAccess;
-    document.getElementById("depth-slider").disabled = allowAccess;
 }
 
 
 function endGame(winner) {
     gameOver = true;
-    document.getElementById("play-again").textContent = "Play Again";
+    document.getElementById("play-again").textContent = "Reset";
     if (winner === 0) {
         alert("YOU LOSE");
     } else {
@@ -186,17 +191,31 @@ function respondToGameStart() {
     document.getElementById("play-again").style.display = "block";
 }
 
-function restart() {
-    count = 0;
-    enemyTurn = false;
-    gameOver = false;
-    fingersList = [1, 1, 1, 1];
-    document.getElementById("play-again").style.display = "none";
-    document.getElementById("play-again").textContent = "Reset";
-    toggleSettingAccess(false);
-    drawHands(fingersList);
+function restart(event) {
+    let buttonText = event.target.textContent;
+    if (buttonText === "Reset") {
+        fingersList = [1, 1, 1, 1];
+        toggleSettingAccess(false);
+        drawHands(fingersList);
+        event.target.textContent = "Start Game";
+    } else {
+        gameOver = false;
+        toggleSettingAccess(true);
+        event.target.textContent = "Reset";
+        if (startingPlayer === "opponent") {
+            enemyTurn = true;
+            performEnemyTurn();
+        } else {
+            enemyTurn = false;
+        }
+    }
 }
 
+document.querySelectorAll('input[name="first-player"]').forEach(radioButton => {
+    radioButton.onclick = () => {
+        startingPlayer = radioButton.value;
+    };
+});
 document.querySelectorAll('input[name="max-fingers"]').forEach(radioButton => {
     radioButton.onclick = () => {
         maxFingers = parseInt(radioButton.value);
@@ -214,5 +233,5 @@ handElements[0].onclick = tapHand;
 handElements[1].onclick = tapHand;
 handElements[2].onclick = selectHand;
 handElements[3].onclick = selectHand;
+document.getElementById("play-again").onclick = restart;
 window.addEventListener("mousemove", mouseMoved);
-window.setInterval(run, 50);
