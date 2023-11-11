@@ -12,6 +12,12 @@ let maxDepth = 25;
 function minimax(state, currentPlayer, currentDepth, alpha, beta, firstMove, nodeCount) {
     nodeCount++;
     if (isTerminal(state) || currentDepth === maxDepth) {
+        let evaluation = evaluate(state);
+        if (evaluation > 0) {
+            evaluation -= currentDepth; // winning faster is better than winning slower
+        } else if (evaluation < 0) {
+            evaluation += currentDepth; // losing slower is better than losing faster
+        }
         return [evaluate(state), nodeCount];
     }
     if (currentPlayer == 0) { // max
